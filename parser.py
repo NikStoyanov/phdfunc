@@ -130,29 +130,38 @@ class PhdParser():
         node_set_top = node_set_top[~mask]
         node_set_bt = node_set_bt[~mask]
 
+        symmout = []
+
         # to build the symmetry we need to write the equations
         for top, bot in zip(node_set_top.T, node_set_bt.T):
             # create the x equation
-            top_txt_x = str(top) + ', 1, ' + txt_symm_cond_x + '\n'
-            bt_txt_x = str(bot) + ', 1, ' + txt_symm_cond_x + '\n'
+            top_txt_x = str(int(top)) + ', 1, ' + txt_symm_cond_x + ', '
+            bt_txt_x = str(int(bot)) + ', 1, ' + txt_symm_cond_x + '\n'
             x_equation = abq_keyword + top_txt_x + bt_txt_x
 
             # create the y equation
-            top_txt_y = str(top) + ', 2, ' + txt_symm_cond_y + '\n'
-            bt_txt_y = str(bot) + ', 2, ' + txt_symm_cond_y + '\n'
+            top_txt_y = str(int(top)) + ', 2, ' + txt_symm_cond_y + ', '
+            bt_txt_y = str(int(bot)) + ', 2, -' + txt_symm_cond_y + '\n'
             y_equation = abq_keyword + top_txt_y + bt_txt_y
 
-            print(x_equation)
-            print(y_equation)
+            symmout.append(x_equation)
+            symmout.append(y_equation)
+
+        return symmout
 
 if __name__ == "__main__":
     DICTI = {'coh_set_top':'Coh_Top',
              'coh_set_bt':'Coh_Bt',
-             'coh_set_ele':'Coh_Ele',
+             'coh_set_ele':'*USER ELEMENT',
              'end_step':'*End Step',
              'symm_x':1,
-             'symm_y':-1,
+             'symm_y':1,
              'symm_nodes':2}
 
-    a = PhdParser("/home/nik/Desktop/Academic/Modelling/Abaqus/2D_PPR_Experiment_Validation/input_data/Cohesive/Cohesive/Job-1.inp")
-    a.cohesive_symmetry_build(DICTI)
+    a = PhdParser('/home/nik/Desktop/Academic/Modelling/Abaqus/2D_PPR_Experiment_Validation/input_data/Cohesive/Cohesive/Job-1.inp')
+    symmout = a.cohesive_symmetry_build(DICTI)
+
+    fob = open('/home/nik/Desktop/Academic/Modelling/Abaqus/2D_PPR_Experiment_Validation/input_data/Cohesive/Cohesive/symm.inp', 'w')
+    for item in symmout:
+        fob.write("%s\n" % item)
+    fob.close()
